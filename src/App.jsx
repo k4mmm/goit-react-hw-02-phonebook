@@ -1,5 +1,8 @@
 import { Component } from "react";
-import { v4 as uuidv4 } from "uuid";
+import { Filter } from "./Components/Filter/Filter";
+import ContactForm from "./Components/ContactForm/ContactForm";
+import { ContactList } from "./Components/ContactList/ContactList";
+import { MainTitle, Title, PhonebookSection } from "./App.styled";
 
 class Phonebook extends Component {
   state = {
@@ -9,24 +12,26 @@ class Phonebook extends Component {
       { id: "id-3", name: "Eden Clements", number: "645-17-79" },
       { id: "id-4", name: "Annie Copeland", number: "227-91-26" },
     ],
-    name: "",
-    number: "",
     filter: "",
   };
 
-  addContact = (e) => {
-    e.preventDefault();
-    let id = uuidv4();
-    const contact = {
-      name: this.state.name,
-      id,
-      number: this.state.number,
-    };
-
+  deleteContact = (data) => {
     this.setState((prevState) => ({
-      contacts: [contact, ...prevState.contacts],
+      contacts: prevState.contacts.filter((contact) => contact.id !== data.id),
     }));
-    this.reset();
+  };
+
+  addContact = (data) => {
+    const { contacts } = this.state;
+    const findContact = contacts.find((contact) => {
+      return contact.name === data.name;
+    });
+
+    !findContact
+      ? this.setState((prevState) => ({
+          contacts: [data, ...prevState.contacts],
+        }))
+      : alert(`${data.name} is already in contact`);
   };
 
   inputChange = (e) => {
@@ -35,64 +40,26 @@ class Phonebook extends Component {
     });
   };
 
-  reset = () => {
-    this.setState({
-      name: "",
-      number: "",
-    });
+  visibleContacts = () => {
+    const { filter, contacts } = this.state;
+    const normalizedFilter = filter.toLowerCase();
+    return contacts.filter((item) =>
+      item.name.toLowerCase().includes(normalizedFilter)
+    );
   };
-  // TODO: Фильтр добавить
-
   render() {
     return (
-      <div>
-        <form onSubmit={this.addContact}>
-          <label>
-            Name:
-            <input
-              type="text"
-              name="name"
-              onChange={this.inputChange}
-              value={this.state.name}
-              pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
-              title="Имя может состоять только из букв, апострофа, тире и пробелов. Например Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan и т. п."
-              required
-            />
-          </label>
-          <label>
-            Tel:
-            <input
-              type="tel"
-              name="number"
-              value={this.state.number}
-              onChange={this.inputChange}
-              pattern="\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}"
-              title="Номер телефона должен состоять цифр и может содержать пробелы, тире, круглые скобки и может начинаться с +"
-              required
-            />
-          </label>
-          <button type="submit">Add contact</button>
-        </form>
-        <ul>
-          <h2>Contacts</h2>
-          <label>
-            Find contacts by name
-            <input
-              type="text"
-              value={this.state.filter}
-              onChange={this.inputChange}
-              name="filter"
-            />
-          </label>
-          {this.state.contacts.map((item) => {
-            return (
-              <li key={item.id}>
-                {item.name} : {item.number}
-              </li>
-            );
-          })}
-        </ul>
-      </div>
+      <PhonebookSection>
+        <MainTitle>Phonebook</MainTitle>
+
+        <ContactForm submit={this.addContact} />
+        <Title>Contacts</Title>
+        <Filter filter={this.state.filter} change={this.inputChange} />
+        <ContactList
+          deleteContact={this.deleteContact}
+          visibleContacts={this.visibleContacts()}
+        />
+      </PhonebookSection>
     );
   }
 }
