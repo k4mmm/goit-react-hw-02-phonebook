@@ -1,9 +1,19 @@
 import PropTypes from "prop-types";
-import { FilterInput } from "./Filter.styled";
+
+import { FilterInput, Label } from "./Filter.styled";
 
 export const Filter = ({ filter, change }) => {
   return (
-    <FilterInput type="text" value={filter} onChange={change} name="filter" />
+    <Label>
+      Find contact by name
+      <FilterInput
+        type="text"
+        value={filter}
+        onChange={change}
+        name="filter"
+        placeholder="Enter contact name"
+      />
+    </Label>
   );
 };
 
